@@ -6,7 +6,9 @@ import 'package:skillforge/providers/user_provider.dart';
 import 'package:skillforge/features/advisor/advisor_viewmodel.dart';
 import 'package:skillforge/features/advisor/widgets/modern_chat_message_widget.dart';
 import 'package:skillforge/features/advisor/widgets/typewriter_text_widget.dart';
+import 'package:skillforge/features/advisor/widgets/pdf_progress_dialog.dart';
 import 'package:skillforge/services/resume_service.dart';
+import 'package:skillforge/services/pdf_service.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ModernAdvisorView extends StatefulWidget {
@@ -370,13 +372,47 @@ class _ModernAdvisorViewState extends State<ModernAdvisorView>
   }
 
   void _generatePDF(String content) {
-    // TODO: Implement PDF generation using flutter_pdf
-    debugPrint('📄 Generating PDF for: ${content.substring(0, content.length > 50 ? 50 : content.length)}...');
+    final userData = Provider.of<UserProvider>(context, listen: false).userData;
+    if (userData == null) return;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PDFProgressDialog(
+        title: 'Generating Career Advice PDF',
+        message: 'Creating your personalized career guidance document...',
+        task: (onProgress) => PDFService.generateCareerAdvicePDF(
+          content: content,
+          userName: userData.name,
+          onProgress: onProgress,
+        ),
+        onComplete: () {
+          debugPrint('✅ PDF generation completed successfully');
+        },
+      ),
+    );
   }
 
   void _createRoadmap(String content) {
-    // TODO: Implement roadmap creation
-    debugPrint('🗺️ Creating roadmap for: ${content.substring(0, content.length > 50 ? 50 : content.length)}...');
+    final userData = Provider.of<UserProvider>(context, listen: false).userData;
+    if (userData == null) return;
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PDFProgressDialog(
+        title: 'Generating Career Roadmap PDF',
+        message: 'Creating your personalized learning path document...',
+        task: (onProgress) => PDFService.generateRoadmapPDF(
+          roadmapContent: content,
+          userName: userData.name,
+          onProgress: onProgress,
+        ),
+        onComplete: () {
+          debugPrint('✅ Roadmap PDF generation completed successfully');
+        },
+      ),
+    );
   }
 
   Widget _buildEmptyState(BuildContext context) {
